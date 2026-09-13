@@ -4,7 +4,7 @@ import { createPromptSchema, storedPromptSchema, updatePromptSchema } from "@/li
 import { mockOrganize, temporaryTitle } from "@/services/mock-organizer";
 import type { CreatePromptInput, Prompt, UpdatePromptInput } from "@/types/prompt";
 
-export const MOCK_STORAGE_KEY = "prompt-inbox.frontend.v1";
+export const MOCK_STORAGE_KEY = "prompt-stash.frontend.v1";
 const storedCollectionSchema = z.object({
   version: z.literal(1),
   prompts: z.array(storedPromptSchema),

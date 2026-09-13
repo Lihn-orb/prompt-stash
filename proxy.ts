@@ -15,7 +15,7 @@ function deny(message: string, status: number, challenge = false) {
       status,
       headers: {
         "Cache-Control": "no-store",
-        ...(challenge ? { "WWW-Authenticate": 'Basic realm="Prompt Inbox", charset="UTF-8"' } : {}),
+        ...(challenge ? { "WWW-Authenticate": 'Basic realm="Prompt Stash", charset="UTF-8"' } : {}),
       },
     },
   );
@@ -29,7 +29,7 @@ export function proxy(request: NextRequest) {
       : NextResponse.next();
   }
   const password = process.env.WORKSPACE_PASSWORD;
-  const apiKey = process.env.PROMPT_INBOX_API_KEY;
+  const apiKey = process.env.PROMPT_STASH_API_KEY;
   const authorization = request.headers.get("authorization") ?? "";
   const isApi = request.nextUrl.pathname.startsWith("/api/");
   const externalCapture =
@@ -44,7 +44,7 @@ export function proxy(request: NextRequest) {
   // A public deployment fails closed instead of exposing the personal library.
   if ((process.env.VERCEL || !isLocal) && (!password || !apiKey)) {
     return deny(
-      "Configure WORKSPACE_PASSWORD and PROMPT_INBOX_API_KEY before exposing this workspace.",
+      "Configure WORKSPACE_PASSWORD and PROMPT_STASH_API_KEY before exposing this workspace.",
       503,
     );
   }

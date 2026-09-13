@@ -1,4 +1,4 @@
-# Prompt Inbox
+# Prompt Stash
 
 A personal prompt library, built on the existing Next.js 16.3.5 / React 19 / TypeScript / Tailwind CSS 4 project.
 
@@ -7,7 +7,7 @@ A personal prompt library, built on the existing Next.js 16.3.5 / React 19 / Typ
 The app resolves its data backend from runtime environment variables, so a single build serves either mode:
 
 - **Local mode (default, zero setup).** No backend env set. The UI persists to browser `localStorage` and the HTTP API stays dormant (`503`). A fresh clone runs immediately with seeded demo data.
-- **Remote mode.** Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PROMPT_INBOX_OWNER_ID` (a UUID). The UI calls same-origin `/api/prompts`, which reads and writes Supabase on the server using the service-role key. The browser never sees the key. Run `supabase/migrations/001_prompts.sql` first.
+- **Remote mode.** Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PROMPT_STASH_OWNER_ID` (a UUID). The UI calls same-origin `/api/prompts`, which reads and writes Supabase on the server using the service-role key. The browser never sees the key. Run `supabase/migrations/001_prompts.sql` first.
 - **Server file store (optional).** Set `ENABLE_SERVER_API=true` (no Supabase) to exercise the same API path against `.data/prompts.json`. Useful before you have Supabase credentials.
 
 Mode is decided in `lib/runtime.ts` and read by both `proxy.ts` (which gates the API) and the root layout (which selects the client store). The layout is `force-dynamic`, so switching env and restarting flips modes without rebuilding.
@@ -52,7 +52,7 @@ Add Prompt -> Inbox -> Search / Filter -> Copy -> Detail -> Edit -> Move to Libr
 - Design, Research, Coding, Writing, Image, and Productivity.
 - Prompt, Template, and Skill.
 
-Browser storage key: `prompt-inbox.frontend.v1`.
+Browser storage key: `prompt-stash.frontend.v1`.
 
 The collection is seeded only when that key is missing. Changes persist across refreshes and server restarts and synchronize between tabs on the same origin. An empty collection stays empty. Invalid stored data is reported, not overwritten.
 

@@ -48,7 +48,7 @@ export function Sidebar({ mobile = false }: { mobile?: boolean }) {
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[4px] border-[1.5px] border-ink bg-ink text-on-action">
             <SquareTerminal size={16} strokeWidth={2.2} />
           </span>
-          <span className="text-[14px] font-bold uppercase tracking-[0.02em]">Prompt Inbox</span>
+          <span className="text-[14px] font-bold uppercase tracking-[0.02em]">Prompt Stash</span>
         </Link>
         {mobile && (
           <Button

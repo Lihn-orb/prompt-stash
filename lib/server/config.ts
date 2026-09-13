@@ -8,11 +8,11 @@ const LOCAL_OWNER_ID = "11111111-1111-4111-8111-111111111111";
 export function storageConfig(): { mode: StorageMode; ownerId: string } {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const ownerId = process.env.PROMPT_INBOX_OWNER_ID;
+  const ownerId = process.env.PROMPT_STASH_OWNER_ID;
   if (url || key) {
     if (!url || !key || !ownerId || !z.uuid().safeParse(ownerId).success) {
       throw new AppError(
-        "Complete SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and a valid PROMPT_INBOX_OWNER_ID.",
+        "Complete SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and a valid PROMPT_STASH_OWNER_ID.",
       );
     }
     return { mode: "supabase", ownerId };

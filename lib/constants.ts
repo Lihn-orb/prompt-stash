@@ -1,6 +1,6 @@
 import type { Category, PromptSource, PromptStatus, PromptType } from "@/types/prompt";
 
-export const APP_NAME = "Prompt Inbox";
+export const APP_NAME = "Prompt Stash";
 export const PROMPTS_CACHE_KEY = "/api/prompts";
 export const MAX_CONTENT_LENGTH = 100_000;
 export const MAX_TITLE_LENGTH = 200;

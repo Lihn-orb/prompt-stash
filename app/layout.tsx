@@ -10,7 +10,7 @@ import { backendMode } from "@/lib/runtime";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Prompt Inbox", template: "%s | Prompt Inbox" },
+  title: { default: "Prompt Stash", template: "%s | Prompt Stash" },
   description:
     "A personal library for your most useful prompts. Capture, organize, find, and reuse.",
   robots: { index: false, follow: false },
