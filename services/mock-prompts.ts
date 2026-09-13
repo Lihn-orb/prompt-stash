@@ -96,6 +96,7 @@ export const mockPrompts = {
       id: crypto.randomUUID(),
       user_id: null,
       title: parsed.title || metadata.title,
+      type: parsed.type ?? metadata.type,
       content: parsed.content,
       status: "inbox",
       source: parsed.source,

@@ -38,6 +38,7 @@ export const createPromptSchema = z
   .object({
     content: contentSchema,
     title: z.string().trim().max(MAX_TITLE_LENGTH).optional(),
+    type: z.enum(["prompt", "template"]).optional(),
     source: z.preprocess(
       (value) => (typeof value === "string" ? value.toLowerCase() : value),
       z.enum(PROMPT_SOURCES).default("manual"),

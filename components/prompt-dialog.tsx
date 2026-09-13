@@ -78,6 +78,7 @@ export function PromptDialog({ prompt }: { prompt?: Prompt }) {
           sourceUrl,
           aiOrganize,
           source: "manual",
+          type: addMode,
         });
         setQuery("");
         router.push("/inbox");

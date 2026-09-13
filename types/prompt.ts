@@ -49,6 +49,7 @@ export interface Prompt extends PromptMetadata {
 export interface CreatePromptInput {
   content: string;
   title?: string;
+  type?: "prompt" | "template";
   source?: PromptSource;
   sourceUrl?: string;
   aiOrganize?: boolean;

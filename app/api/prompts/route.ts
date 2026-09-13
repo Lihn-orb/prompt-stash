@@ -21,7 +21,11 @@ export async function POST(request: Request) {
     const result = input.aiOrganize
       ? await organizePrompt(input.content)
       : { metadata: fallbackMetadata(input.content), organization: "manual" as const };
-    const metadata = { ...result.metadata, title: input.title || result.metadata.title };
+    const metadata = {
+      ...result.metadata,
+      title: input.title || result.metadata.title,
+      ...(input.type ? { type: input.type } : {}),
+    };
     const prompt = await createPrompt(input, metadata);
     return jsonResponse({ success: true, prompt, organization: result.organization }, 201);
   } catch (error) {
