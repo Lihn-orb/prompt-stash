@@ -172,9 +172,13 @@ test("Keyboard shortcuts and modal focus stay predictable", async ({ page }) => 
   await expect(dialog.locator("#prompt-content")).toBeFocused();
   await expect(dialog.getByRole("button", { name: "Save prompt" })).toBeDisabled();
   await page.keyboard.press("Shift+Tab");
-  await expect(dialog.getByRole("button", { name: "Close modal" })).toBeFocused();
+  await expect(dialog.getByRole("button", { name: "skill", exact: true })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
-  await expect(dialog.getByRole("button", { name: "Cancel" })).toBeFocused();
+  await expect(dialog.getByRole("button", { name: "template", exact: true })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(dialog.getByRole("button", { name: "prompt", exact: true })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(dialog.getByRole("button", { name: "Close modal" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole("textbox", { name: "Search prompts" })).toBeFocused();

@@ -1,11 +1,43 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { backendMode } from "@/lib/runtime";
+
+const SESSION_COOKIE = "prompt_stash_session";
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 function equalSecret(actual: string, expected: string) {
   const left = Buffer.from(actual);
   const right = Buffer.from(expected);
   return left.length === right.length && timingSafeEqual(left, right);
+}
+
+function signSession(password: string, issuedAt: number): string {
+  return createHmac("sha256", password).update(String(issuedAt)).digest("hex");
+}
+
+function validSessionCookie(cookie: string | undefined, password: string): boolean {
+  if (!cookie) return false;
+  const dot = cookie.indexOf(".");
+  if (dot < 0) return false;
+  const issuedAt = Number(cookie.slice(0, dot));
+  const signature = cookie.slice(dot + 1);
+  if (!Number.isFinite(issuedAt) || !signature) return false;
+  const ageSeconds = (Date.now() - issuedAt) / 1000;
+  if (ageSeconds < 0 || ageSeconds > SESSION_TTL_SECONDS) return false;
+  try {
+    return equalSecret(signature, signSession(password, issuedAt));
+  } catch {
+    return false;
+  }
+}
+
+function issueSessionCookie(password: string): { name: string; value: string; maxAge: number } {
+  const issuedAt = Date.now();
+  return {
+    name: SESSION_COOKIE,
+    value: `${issuedAt}.${signSession(password, issuedAt)}`,
+    maxAge: SESSION_TTL_SECONDS,
+  };
 }
 
 function deny(message: string, status: number, challenge = false) {
@@ -32,9 +64,6 @@ export function proxy(request: NextRequest) {
   const apiKey = process.env.PROMPT_STASH_API_KEY;
   const authorization = request.headers.get("authorization") ?? "";
   const isApi = request.nextUrl.pathname.startsWith("/api/");
-  const externalCapture =
-    request.method === "POST" &&
-    (request.nextUrl.pathname === "/api/prompts" || request.nextUrl.pathname === "/api/skills");
   // NextURL normalizes loopback IPs to localhost; the browser Origin does not.
   const requestHost = request.headers.get("host") ?? request.nextUrl.host;
   const hostname = new URL(`http://${requestHost}`).hostname;
@@ -49,8 +78,24 @@ export function proxy(request: NextRequest) {
     );
   }
 
+  // Explicit logout endpoint: clears the session cookie so the next request re-auths.
+  if (request.nextUrl.pathname === "/api/session/logout" && request.method === "POST") {
+    const response = NextResponse.json({ success: true });
+    response.cookies.set({
+      name: SESSION_COOKIE,
+      value: "",
+      maxAge: 0,
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: !isLocal,
+    });
+    return response;
+  }
+
+  // Bearer tokens authenticate machine callers (Codex, curl) for the entire API.
   if (authorization.startsWith("Bearer ")) {
-    if (!externalCapture || !apiKey || !equalSecret(authorization.slice(7), apiKey)) {
+    if (!isApi || !apiKey || !equalSecret(authorization.slice(7), apiKey)) {
       return deny("Invalid API key or unsupported API operation.", 401);
     }
     return NextResponse.next();
@@ -65,6 +110,9 @@ export function proxy(request: NextRequest) {
   }
 
   if (password) {
+    const cookie = request.cookies.get(SESSION_COOKIE)?.value;
+    if (validSessionCookie(cookie, password)) return NextResponse.next();
+
     let valid = false;
     if (authorization.startsWith("Basic ")) {
       try {
@@ -79,7 +127,18 @@ export function proxy(request: NextRequest) {
       }
     }
     if (!valid) return deny("Workspace authentication required.", 401, true);
-  } else if (apiKey && externalCapture && !request.headers.get("origin")) {
+    // Successful Basic Auth mints a signed cookie so subsequent requests skip the prompt.
+    const response = NextResponse.next();
+    const cookiePayload = issueSessionCookie(password);
+    response.cookies.set({
+      ...cookiePayload,
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: !isLocal,
+    });
+    return response;
+  } else if (apiKey && isApi && !request.headers.get("origin")) {
     return deny("A Bearer API key is required.", 401);
   }
   return NextResponse.next();

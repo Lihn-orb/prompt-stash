@@ -33,6 +33,14 @@ export default defineConfig({
       url: "http://127.0.0.1:3100/inbox",
       reuseExistingServer: false,
       timeout: 30_000,
+      env: {
+        // Force local browser-storage mode regardless of what the developer's
+        // .env.local configures (Supabase, workspace auth, etc.).
+        SUPABASE_URL: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        WORKSPACE_PASSWORD: "",
+        PROMPT_STASH_API_KEY: "",
+      },
     },
     {
       // Remote mode against the on-disk server store (no Supabase needed for CI).
@@ -44,6 +52,10 @@ export default defineConfig({
         ENABLE_SERVER_API: "true",
         LOCAL_DATA_FILE: ".data/e2e-remote.json",
         SEED_DEMO_DATA: "false",
+        SUPABASE_URL: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        WORKSPACE_PASSWORD: "",
+        PROMPT_STASH_API_KEY: "",
       },
     },
   ],

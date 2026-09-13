@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/prompt-card";
+import { TemplateFiller } from "@/components/template-filler";
 import { useWorkspace } from "@/components/workspace-provider";
 import { CATEGORY_COLORS, SOURCE_LABELS, STATUS_LABELS, TYPE_LABELS } from "@/lib/constants";
 import { fullDate } from "@/lib/utils";
@@ -142,6 +143,12 @@ export function PromptDetail({ id }: { id: string }) {
               {prompt.content}
             </pre>
           </div>
+          {prompt.type === "template" && (
+            <div className="mt-6 rounded-[13px] border border-border-subtle bg-surface-hover px-6 py-5 sm:px-8 sm:py-6">
+              <h3 className="mb-3 text-sm font-semibold text-secondary">Fill in variables</h3>
+              <TemplateFiller content={prompt.content} />
+            </div>
+          )}
         </section>
         <aside className="min-w-0">
           <h2 className="mb-5 text-sm font-semibold text-secondary">Details</h2>
