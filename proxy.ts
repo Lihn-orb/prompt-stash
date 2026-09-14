@@ -138,8 +138,6 @@ export function proxy(request: NextRequest) {
       secure: !isLocal,
     });
     return response;
-  } else if (apiKey && isApi && !request.headers.get("origin")) {
-    return deny("A Bearer API key is required.", 401);
   }
   return NextResponse.next();
 }
