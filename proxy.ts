@@ -62,8 +62,12 @@ export function proxy(request: NextRequest) {
   }
   const password = process.env.WORKSPACE_PASSWORD;
   const apiKey = process.env.PROMPT_STASH_API_KEY;
+  // Opt-in: let unauthenticated GET/HEAD requests view pages and read the API so
+  // the workspace can be embedded (e.g. in Feishu docs). Writes stay protected.
+  const publicReadonly = process.env.PROMPT_STASH_PUBLIC_READONLY === "true";
   const authorization = request.headers.get("authorization") ?? "";
   const isApi = request.nextUrl.pathname.startsWith("/api/");
+  const isSafeMethod = ["GET", "HEAD", "OPTIONS"].includes(request.method);
   // NextURL normalizes loopback IPs to localhost; the browser Origin does not.
   const requestHost = request.headers.get("host") ?? request.nextUrl.host;
   const hostname = new URL(`http://${requestHost}`).hostname;
@@ -101,7 +105,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (isApi && !["GET", "HEAD", "OPTIONS"].includes(request.method)) {
+  if (isApi && !isSafeMethod) {
     const origin = request.headers.get("origin");
     const crossSite = request.headers.get("sec-fetch-site") === "cross-site";
     if (crossSite || (origin && origin !== expectedOrigin)) {
@@ -112,6 +116,10 @@ export function proxy(request: NextRequest) {
   if (password) {
     const cookie = request.cookies.get(SESSION_COOKIE)?.value;
     if (validSessionCookie(cookie, password)) return NextResponse.next();
+
+    // Public read-only mode: unauthenticated safe requests may view pages and
+    // read the API. Writes still fall through to the auth challenge below.
+    if (publicReadonly && isSafeMethod && !authorization) return NextResponse.next();
 
     let valid = false;
     if (authorization.startsWith("Basic ")) {
